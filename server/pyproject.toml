@@ -9,8 +9,16 @@ readme = "README.md"
 python = "^3.10"
 mediapipe = "^0.10.15"
 opencv-contrib-python = "^4.10.0.84"
+flask = "^3.0.3"
+flask-cors = "^5.0.0"
 
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.10.0"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
