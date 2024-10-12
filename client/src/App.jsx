@@ -1,10 +1,10 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import reactLogo from "./assets/react.svg";
+import viteLogo from "/vite.svg";
+import "./App.css";
 
 function App() {
-  const [test, setTest] = useState("")
+  const [test, setTest] = useState("");
 
   return (
     <>
@@ -18,11 +18,13 @@ function App() {
       </div>
       <h1>Vite + React</h1>
       <div className="card">
-        <button onClick={async () => {
-          const resp = await fetch("http://localhost:5000/get-data")
-          const data = await resp.text()
-          setTest(data)
-        }}>
+        <button
+          onClick={async () => {
+            const resp = await fetch("http://localhost:5000/get-data");
+            const data = await resp.text();
+            setTest(data);
+          }}
+        >
           count is {test}
         </button>
         <p>
@@ -33,7 +35,7 @@ function App() {
         Click on the Vite and React logos to learn more
       </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
