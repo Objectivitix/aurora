@@ -1,5 +1,6 @@
 import js from "@eslint/js";
 import globals from "globals";
+import configPrettier from "eslint-config-prettier";
 import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
@@ -17,7 +18,6 @@ export default [
         sourceType: "module",
       },
     },
-    extends: ["prettier"],
     settings: { react: { version: "18.3" } },
     plugins: {
       react,
@@ -30,6 +30,13 @@ export default [
       ...react.configs["jsx-runtime"].rules,
       ...reactHooks.configs.recommended.rules,
       quotes: ["error", "double"],
+      "no-unused-vars": [
+        "error",
+        {
+          varsIgnorePattern: "^_$",
+          caughtErrorsIgnorePattern: "^_$",
+        },
+      ],
       "react/jsx-no-target-blank": "off",
       "react-refresh/only-export-components": [
         "warn",
@@ -37,4 +44,5 @@ export default [
       ],
     },
   },
+  configPrettier,
 ];

@@ -1,3 +1,5 @@
+import atexit
+from enum import Enum
 from typing import NamedTuple, TypeAlias
 
 import numpy as np
@@ -9,6 +11,27 @@ Point: TypeAlias = np.ndarray[np.float64]
 draw = mp.solutions.drawing_utils
 styles = mp.solutions.drawing_styles
 pose = mp.solutions.pose
+
+NECK_ANGLE_OFFSET = 12
+
+model = pose.Pose(
+    model_complexity=2,
+    smooth_landmarks=True,
+    min_detection_confidence=0.5,
+    min_tracking_confidence=0.5,
+)
+
+atexit.register(lambda: model.close())
+
+
+class Status(Enum):
+    SUCCESS = object()
+    NO_PERSON_DETECTED = object()
+    CAMERA_MISALIGNED = object()
+    BAD_VISIBILITY = object()
+
+    def __repr__(self):
+        return self._name_
 
 
 class Joint(NamedTuple):
@@ -58,9 +81,9 @@ def get_joints(landmarks, *, two_d: bool = False) -> Joints:
 
 def is_visible(joints: Joints) -> bool:
     return (
-        joints.l_ear.visibility + joints.r_ear.visibility > 1
-        and joints.l_shoulder.visibility + joints.r_shoulder.visibility > 1
-        and joints.l_hip.visibility + joints.r_hip.visibility > 1
+        joints.l_ear.visibility + joints.r_ear.visibility > 0.8
+        and joints.l_shoulder.visibility + joints.r_shoulder.visibility > 0.8
+        and joints.l_hip.visibility + joints.r_hip.visibility > 0.3
     )
 
 
@@ -86,12 +109,38 @@ def calc_posture_angles(joints: Joints) -> tuple[int, int]:
     else:
         upwards_nudge = np.array([0, 1, 0])
 
-    neck_angle = calc_angle(ear, shoulder, hip) - 12
+    neck_angle = calc_angle(ear, shoulder, hip) - NECK_ANGLE_OFFSET
     torso_angle = calc_angle(shoulder, hip, hip + upwards_nudge)
 
     # print(f"DEBUG: {neck_angle:.2f} {torso_angle:.2f}")
 
     return neck_angle, torso_angle
+
+
+def analyze(image: np.ndarray) -> tuple[int, tuple[float, float]]:
+    # Convert the image to RGB format for MediaPipe Pose processing
+    rgb_image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
+
+    # Process the image with the Pose model
+    results = model.process(rgb_image)
+
+    # Check if the landmarks even exist
+    if results.pose_landmarks is None:
+        return Status.NO_PERSON_DETECTED, (None, None)
+
+    landmarks = results.pose_landmarks.landmark
+    joints = get_joints(landmarks, two_d=True)
+
+    # Check if camera is aligned to person's side profile
+    if not is_aligned(joints):
+        return Status.CAMERA_MISALIGNED, (None, None)
+
+    # Check if we have good visibility on the joints
+    if not is_visible(joints):
+        return Status.BAD_VISIBILITY, (None, None)
+
+    # If everything's good, calc the posture angles and return
+    return Status.SUCCESS, calc_posture_angles(joints)
 
 
 def test_real_time(*, scale: float = 2, save_file: str = None, save_fps: int = 10):

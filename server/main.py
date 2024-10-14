@@ -1,3 +1,5 @@
+import cv2 as cv
+import numpy as np
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
@@ -32,7 +34,41 @@ def get_data():
 # frames that client sends over for analysis
 @app.route("/submit-frame", methods=["POST"])
 def submit_frame():
-    pass
+    # Receive the image file from the client
+    image_file = request.files["image"]
+
+    # Convert the file to a NumPy array, then read with OpenCV
+    mat = np.frombuffer(image_file.read(), np.uint8)
+    image = cv.imdecode(mat, cv.IMREAD_COLOR)
+
+    # Delegate posture analysis to our analyzer
+    status, posture_angles = analyzer.analyze(image)
+    print(status, posture_angles)
+
+    if status == analyzer.Status.SUCCESS:
+        neck_angle, torso_angle = posture_angles
+        print(neck_angle, torso_angle)
+
+        return (
+            jsonify(
+                {
+                    "status": "success",
+                    "neck_angle": neck_angle,
+                    "torso_angle": torso_angle,
+                }
+            ),
+            200,
+        )
+
+    return (
+        jsonify(
+            {
+                "status": "error",
+                "message": "No person, camera misalignment, or bad data",
+            }
+        ),
+        400,
+    )
 
 
 # Route to begin new monitoring session
@@ -44,5 +80,5 @@ def new_session():
 # Driver code, starts the Flask server by hosting
 # it locally on port 5000
 if __name__ == "__main__":
-    analyzer.test_real_time(save_file="test.mp4", save_fps=60)
-    # app.run(debug=True, port=5000)
+    # analyzer.test_real_time(save_file="test.mp4", save_fps=60)
+    app.run(debug=True, port=5000)
