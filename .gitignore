@@ -24,5 +24,6 @@ dist
 dist-ssr
 *.local
 
-# Server deps & caches
+# Server caches & test output files
 __pycache__
+*.mp4

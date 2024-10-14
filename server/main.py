@@ -1,6 +1,8 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
+from server import analyzer
+
 # Create Flask backend and enable cross-origin resource sharing
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -42,4 +44,5 @@ def new_session():
 # Driver code, starts the Flask server by hosting
 # it locally on port 5000
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    analyzer.test_real_time(save_file="test.mp4", save_fps=60)
+    # app.run(debug=True, port=5000)
