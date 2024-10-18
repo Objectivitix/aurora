@@ -26,4 +26,4 @@ dist-ssr
 
 # Server caches & test output files
 __pycache__
-*.mp4
+test-output

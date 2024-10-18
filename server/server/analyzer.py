@@ -1,4 +1,5 @@
 import atexit
+import math
 from enum import Enum
 from typing import NamedTuple, TypeAlias
 
@@ -7,21 +8,22 @@ import cv2 as cv
 import mediapipe as mp
 
 Point: TypeAlias = np.ndarray[np.float64]
+Model: TypeAlias = mp.solutions.pose.Pose
 
 draw = mp.solutions.drawing_utils
 styles = mp.solutions.drawing_styles
 pose = mp.solutions.pose
 
 NECK_ANGLE_OFFSET = 12
+STANDARD_INPUT_WIDTH = 1280
 
-model = pose.Pose(
+default_model = pose.Pose(
+    static_image_mode=True,
     model_complexity=2,
-    smooth_landmarks=True,
-    min_detection_confidence=0.5,
-    min_tracking_confidence=0.5,
+    min_detection_confidence=0.6,
 )
 
-atexit.register(lambda: model.close())
+atexit.register(lambda: default_model.close())
 
 
 class Status(Enum):
@@ -109,7 +111,7 @@ def calc_posture_angles(joints: Joints) -> tuple[int, int]:
     else:
         upwards_nudge = np.array([0, 1, 0])
 
-    neck_angle = calc_angle(ear, shoulder, hip) - NECK_ANGLE_OFFSET
+    neck_angle = abs(calc_angle(ear, shoulder, hip) - NECK_ANGLE_OFFSET)
     torso_angle = calc_angle(shoulder, hip, hip + upwards_nudge)
 
     # print(f"DEBUG: {neck_angle:.2f} {torso_angle:.2f}")
@@ -117,12 +119,16 @@ def calc_posture_angles(joints: Joints) -> tuple[int, int]:
     return neck_angle, torso_angle
 
 
-def analyze(image: np.ndarray) -> tuple[int, tuple[float, float]]:
+def analyze(
+    image: np.ndarray,
+) -> tuple[Status, tuple[float, float] | tuple[None, None]]:
+    resized = standardize_width(image)
+
     # Convert the image to RGB format for MediaPipe Pose processing
-    rgb_image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
+    rgb_image = cv.cvtColor(resized, cv.COLOR_BGR2RGB)
 
     # Process the image with the Pose model
-    results = model.process(rgb_image)
+    results = default_model.process(rgb_image)
 
     # Check if the landmarks even exist
     if results.pose_landmarks is None:
@@ -143,89 +149,26 @@ def analyze(image: np.ndarray) -> tuple[int, tuple[float, float]]:
     return Status.SUCCESS, calc_posture_angles(joints)
 
 
-def test_real_time(*, scale: float = 2, save_file: str = None, save_fps: int = 10):
-    webcam = cv.VideoCapture(0)
+def calc_good_posture_rate(neck_angles: np.ndarray, torso_angles: np.ndarray) -> float:
+    if neck_angles.shape == (0,) and torso_angles.shape == (0,):
+        return math.nan
 
-    width = int(webcam.get(cv.CAP_PROP_FRAME_WIDTH) * scale)
-    height = int(webcam.get(cv.CAP_PROP_FRAME_HEIGHT) * scale)
+    return float(
+        (sum(neck_angles < 18) + sum(torso_angles < 10))
+        / (len(neck_angles) + len(torso_angles))
+    )
 
-    if save_file is not None:
-        codec = cv.VideoWriter_fourcc(*"mp4v")
-        writer = cv.VideoWriter(save_file, codec, save_fps, (width, height))
 
-    with pose.Pose(
-        model_complexity=1,
-        smooth_landmarks=True,
-        min_detection_confidence=0.4,
-        min_tracking_confidence=0.4,
-    ) as model:
+def calc_aura(neck_angles: np.ndarray, torso_angles: np.ndarray) -> int:
+    return int(sum((18 - neck_angles) * 10) + sum((10 - torso_angles) * 10))
 
-        while webcam.isOpened():
-            success, image = webcam.read()
 
-            if not success:
-                print("LOG: Skipped a bad-camera frame")
-                continue
+def standardize_width(image: np.ndarray) -> np.ndarray:
+    height, width, *_ = image.shape
 
-            results = model.process(cv.cvtColor(image, cv.COLOR_BGR2RGB))
+    # Calculate the new height, keeping aspect ratio
+    resize_ratio = STANDARD_INPUT_WIDTH / width
+    new_height = int(height * resize_ratio)
 
-            if results.pose_landmarks is None:
-                print("LOG: Skipped a no-person-detected frame")
-                continue
-
-            draw.draw_landmarks(
-                image,
-                results.pose_landmarks,
-                pose.POSE_CONNECTIONS,
-                landmark_drawing_spec=styles.get_default_pose_landmarks_style(),
-            )
-
-            landmarks = results.pose_landmarks.landmark
-            joints = get_joints(landmarks, two_d=True)
-
-            if is_aligned(joints):
-                cv.putText(
-                    image, "Aligned", (10, 30), cv.FONT_ITALIC, 0.6, (0, 255, 0), 2
-                )
-            else:
-                cv.putText(
-                    image, "Misaligned", (10, 30), cv.FONT_ITALIC, 0.6, (0, 0, 255), 2
-                )
-
-            if is_visible(joints):
-                cv.putText(
-                    image, "Good Data", (130, 30), cv.FONT_ITALIC, 0.6, (0, 255, 0), 2
-                )
-            else:
-                cv.putText(
-                    image, "Bad Data", (130, 30), cv.FONT_ITALIC, 0.6, (0, 0, 255), 2
-                )
-
-            neck_angle, torso_angle = calc_posture_angles(joints)
-
-            cv.putText(
-                image,
-                text=f"neck: {neck_angle:.1f}, torso: {torso_angle:.1f}",
-                org=(10, 60),
-                fontFace=cv.FONT_ITALIC,
-                fontScale=0.6,
-                color=(0, 0, 0),
-                thickness=2,
-            )
-
-            image = cv.resize(image, (width, height), interpolation=cv.INTER_AREA)
-
-            cv.imshow("Analyzer Real-Time Test", image)
-
-            if save_file is not None:
-                writer.write(image)
-
-            if (
-                cv.waitKey(5) & 0xFF == ord("q")
-                or cv.getWindowProperty("Analyzer Real-Time Test", cv.WND_PROP_VISIBLE)
-                < 1
-            ):
-                break
-
-    webcam.release()
-    cv.destroyAllWindows()
+    # Resize the image
+    return cv.resize(image, (STANDARD_INPUT_WIDTH, new_height))

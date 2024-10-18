@@ -5,6 +5,7 @@ export default function Proof() {
   const [neckAngle, setNeckAngle] = useState(null);
   const [torsoAngle, setTorsoAngle] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [everything, setEverything] = useState("");
 
   // Handle file selection
   const handleFileChange = (evt) => {
@@ -23,6 +24,7 @@ export default function Proof() {
 
     const formData = new FormData();
     formData.append("image", selectedFile);
+    formData.append("time", Date.now());
 
     try {
       const response = await fetch("http://localhost:5000/submit-frame", {
@@ -32,9 +34,9 @@ export default function Proof() {
 
       const data = await response.json();
 
-      if (response.status === 200) {
-        setNeckAngle(data.neck_angle);
-        setTorsoAngle(data.torso_angle);
+      if (response.status === 201) {
+        setNeckAngle(data.neckAngle);
+        setTorsoAngle(data.torsoAngle);
         setErrorMessage("");
       } else {
         setErrorMessage(data.message || "Error analyzing posture.");
@@ -62,6 +64,30 @@ export default function Proof() {
           <p>Torso Angle: {torsoAngle.toFixed(2)}°</p>
         </div>
       )}
+
+      {everything !== "" && <p>{everything}</p>}
+
+      <button
+        onClick={async () => {
+          try {
+            const response = await fetch("http://localhost:5000/get-data");
+            const data = await response.text();
+
+            if (response.status === 200) {
+              setNeckAngle(null);
+              setTorsoAngle(null);
+              setErrorMessage("");
+              setEverything(data);
+            } else {
+              setErrorMessage("Something went wrong.");
+              setNeckAngle(null);
+              setTorsoAngle(null);
+            }
+          } catch (_) {
+            setErrorMessage("Something went wrong, part 2.");
+          }
+        }}
+      ></button>
     </>
   );
 }

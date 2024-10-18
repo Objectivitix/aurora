@@ -1,32 +1,47 @@
+import threading
+
 import cv2 as cv
 import numpy as np
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-from server import analyzer
+from server import analyzer, tester
 
 # Create Flask backend and enable cross-origin resource sharing
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
+
+times = []
+neck_angles = []
+torso_angles = []
 
 
 # Define the route we'll use to serve final analysis data as JSON.
 # We're essentially making our own API for client-server comms.
 @app.route("/get-data", methods=["GET"])
 def get_data():
-    return jsonify(
-        {
-            "neck": {
-                "times": [0, 10, 20, 30, 50, 60],
-                "angles": [12, 11, 13, 12, 13, 13],
-            },
-            "torso": {
-                "times": [0, 20, 30, 50, 60],
-                "angles": [8, 9, 11, 9, 10],
-            },
-            "good_posture_rate": 1.0,
-            "aura": 250,
-        }
+    neck_numpy = np.array(neck_angles)
+    torso_numpy = np.array(torso_angles)
+
+    good_rate = analyzer.calc_good_posture_rate(neck_numpy, torso_numpy)
+    aura = analyzer.calc_aura(neck_numpy, torso_numpy)
+
+    return (
+        jsonify(
+            {
+                "neck": {
+                    "times": times,
+                    "angles": neck_angles,
+                },
+                "torso": {
+                    "times": times,
+                    "angles": torso_angles,
+                },
+                "good_posture_rate": good_rate,
+                "aura": aura,
+            }
+        ),
+        200,
     )
 
 
@@ -42,29 +57,33 @@ def submit_frame():
     image = cv.imdecode(mat, cv.IMREAD_COLOR)
 
     # Delegate posture analysis to our analyzer
-    status, posture_angles = analyzer.analyze(image)
-    print(status, posture_angles)
+    status, (neck_angle, torso_angle) = analyzer.analyze(image)
+
+    threading.Thread(
+        target=tester.test_one_frame,
+        args=(image,),
+        kwargs={"save_file": "test-output/test.jpg", "scale": 0.75},
+    ).start()
 
     if status == analyzer.Status.SUCCESS:
-        neck_angle, torso_angle = posture_angles
-        print(neck_angle, torso_angle)
+        times.append(float(request.form["time"]))
+        neck_angles.append(neck_angle)
+        torso_angles.append(torso_angle)
 
         return (
             jsonify(
                 {
-                    "status": "success",
-                    "neck_angle": neck_angle,
-                    "torso_angle": torso_angle,
+                    "neckAngle": neck_angle,
+                    "torsoAngle": torso_angle,
                 }
             ),
-            200,
+            201,
         )
 
     return (
         jsonify(
             {
-                "status": "error",
-                "message": "No person, camera misalignment, or bad data",
+                "message": repr(status),
             }
         ),
         400,
@@ -74,11 +93,15 @@ def submit_frame():
 # Route to begin new monitoring session
 @app.route("/new-session", methods=["POST"])
 def new_session():
-    pass
+    times.clear()
+    neck_angles.clear()
+    torso_angles.clear()
+
+    return jsonify({"message": "New monitoring session begun!"}), 201
 
 
 # Driver code, starts the Flask server by hosting
 # it locally on port 5000
 if __name__ == "__main__":
-    # analyzer.test_real_time(save_file="test.mp4", save_fps=60)
+    # tester.test_real_time(save_file="test-output/test.mp4", save_fps=60)
     app.run(debug=True, port=5000)
