@@ -84,12 +84,7 @@ def test_real_time(
 ):
     webcam = cv.VideoCapture(0)
 
-    width = int(webcam.get(cv.CAP_PROP_FRAME_WIDTH) * scale)
-    height = int(webcam.get(cv.CAP_PROP_FRAME_HEIGHT) * scale)
-
-    if save_file is not None:
-        codec = cv.VideoWriter_fourcc(*"mp4v")
-        writer = cv.VideoWriter(save_file, codec, save_fps, (width, height))
+    writer = None
 
     with pose.Pose(
         model_complexity=1,
@@ -109,6 +104,10 @@ def test_real_time(
 
             height, width, *_ = processed.shape
             final_size = int(width * scale), int(height * scale)
+
+            if save_file is not None and writer is None:
+                codec = cv.VideoWriter_fourcc(*"mp4v")
+                writer = cv.VideoWriter(save_file, codec, save_fps, final_size)
 
             resized = cv.resize(processed, final_size, interpolation=cv.INTER_AREA)
 
