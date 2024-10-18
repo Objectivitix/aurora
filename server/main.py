@@ -66,7 +66,7 @@ def submit_frame():
     ).start()
 
     if status == analyzer.Status.SUCCESS:
-        times.append(float(request.form["time"]))
+        times.append(int(request.form["time"]))
         neck_angles.append(neck_angle)
         torso_angles.append(torso_angle)
 

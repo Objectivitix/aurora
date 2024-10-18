@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 export default function Proof() {
+  const firstTime = useRef(null);
+
   const [selectedFile, setSelectedFile] = useState(null);
   const [neckAngle, setNeckAngle] = useState(null);
   const [torsoAngle, setTorsoAngle] = useState(null);
@@ -24,7 +26,12 @@ export default function Proof() {
 
     const formData = new FormData();
     formData.append("image", selectedFile);
-    formData.append("time", Date.now());
+
+    if (firstTime.current == null) {
+      firstTime.current = Math.floor(Date.now() / 1000);
+    }
+
+    formData.append("time", Math.floor(Date.now() / 1000) - firstTime.current);
 
     try {
       const response = await fetch("http://localhost:5000/submit-frame", {
@@ -87,7 +94,30 @@ export default function Proof() {
             setErrorMessage("Something went wrong, part 2.");
           }
         }}
-      ></button>
+      >
+        All The Data, Please
+      </button>
+
+      <button
+        onClick={async () => {
+          try {
+            const response = await fetch("http://localhost:5000/new-session", {
+              method: "POST",
+            });
+
+            if (response.status === 201) {
+              firstTime.current = null;
+              setEverything("New monitoring session started.");
+            } else {
+              setErrorMessage("Failed to start new session.");
+            }
+          } catch (_) {
+            setErrorMessage("Error: Could not connect to the server.");
+          }
+        }}
+      >
+        Start New Session
+      </button>
     </>
   );
 }
