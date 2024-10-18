@@ -14,18 +14,20 @@ pose = mp.solutions.pose
 
 
 def process_frame(image: np.ndarray, *, model: Optional[Model] = None) -> np.ndarray:
+    resized = analyzer.standardize_width(image)
+
     results = (model or analyzer.default_model).process(
-        cv.cvtColor(analyzer.standardize_width(image), cv.COLOR_BGR2RGB)
+        cv.cvtColor(resized, cv.COLOR_BGR2RGB)
     )
 
     if results.pose_landmarks is None:
         cv.putText(
-            image, "NO PERSON DETECTED", (10, 30), cv.FONT_ITALIC, 0.6, (0, 0, 255), 2
+            resized, "NO PERSON DETECTED", (10, 30), cv.FONT_ITALIC, 0.6, (0, 0, 255), 2
         )
-        return image
+        return resized
 
     draw.draw_landmarks(
-        image,
+        resized,
         results.pose_landmarks,
         pose.POSE_CONNECTIONS,
         landmark_drawing_spec=styles.get_default_pose_landmarks_style(),
@@ -35,19 +37,19 @@ def process_frame(image: np.ndarray, *, model: Optional[Model] = None) -> np.nda
     joints = analyzer.get_joints(landmarks, two_d=True)
 
     if analyzer.is_aligned(joints):
-        cv.putText(image, "Aligned", (25, 70), cv.FONT_ITALIC, 1.5, (0, 255, 0), 5)
+        cv.putText(resized, "Aligned", (25, 70), cv.FONT_ITALIC, 1.5, (0, 255, 0), 5)
     else:
-        cv.putText(image, "Misaligned", (25, 70), cv.FONT_ITALIC, 1.5, (0, 0, 255), 5)
+        cv.putText(resized, "Misaligned", (25, 70), cv.FONT_ITALIC, 1.5, (0, 0, 255), 5)
 
     if analyzer.is_visible(joints):
-        cv.putText(image, "Good Data", (300, 70), cv.FONT_ITALIC, 1.5, (0, 255, 0), 5)
+        cv.putText(resized, "Good Data", (300, 70), cv.FONT_ITALIC, 1.5, (0, 255, 0), 5)
     else:
-        cv.putText(image, "Bad Data", (300, 70), cv.FONT_ITALIC, 1.5, (0, 0, 255), 5)
+        cv.putText(resized, "Bad Data", (300, 70), cv.FONT_ITALIC, 1.5, (0, 0, 255), 5)
 
     neck_angle, torso_angle = analyzer.calc_posture_angles(joints)
 
     cv.putText(
-        image,
+        resized,
         text=f"neck: {neck_angle:.1f}, torso: {torso_angle:.1f}",
         org=(25, 135),
         fontFace=cv.FONT_ITALIC,
@@ -56,16 +58,17 @@ def process_frame(image: np.ndarray, *, model: Optional[Model] = None) -> np.nda
         thickness=5,
     )
 
-    return image
+    return resized
 
 
 def test_one_frame(
     image: np.ndarray, *, scale: float = 2, save_file: Optional[str] = None
 ):
-    height, width, *_ = image.shape
+    processed = process_frame(image)
+
+    height, width, *_ = processed.shape
     final_size = int(width * scale), int(height * scale)
 
-    processed = process_frame(image)
     resized = cv.resize(processed, final_size, interpolation=cv.INTER_AREA)
 
     if save_file is not None:
@@ -103,7 +106,11 @@ def test_real_time(
                 continue
 
             processed = process_frame(image, model=model)
-            resized = cv.resize(processed, (width, height), interpolation=cv.INTER_AREA)
+
+            height, width, *_ = processed.shape
+            final_size = int(width * scale), int(height * scale)
+
+            resized = cv.resize(processed, final_size, interpolation=cv.INTER_AREA)
 
             cv.imshow("Analyzer Real-Time Test", resized)
 

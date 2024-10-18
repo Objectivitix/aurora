@@ -1,5 +1,7 @@
 import { useState, useRef } from "react";
 
+import Webcam from "./Webcam";
+
 export default function Proof() {
   const firstTime = useRef(null);
 
@@ -12,6 +14,11 @@ export default function Proof() {
   // Handle file selection
   const handleFileChange = (evt) => {
     setSelectedFile(evt.target.files[0]);
+    setErrorMessage("");
+  };
+
+  const handleCapture = (file) => {
+    setSelectedFile(file);
     setErrorMessage("");
   };
 
@@ -60,6 +67,7 @@ export default function Proof() {
       <h1>Posture Analyzer</h1>
       <form onSubmit={handleSubmit}>
         <input type="file" accept="image/*" onChange={handleFileChange} />
+        <Webcam onCapture={handleCapture} />
         <button type="submit">Analyze Posture</button>
       </form>
 
