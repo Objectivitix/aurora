@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import Countdown, { Unit } from "./Countdown";
 import Webcam from "./Webcam";
 
@@ -9,7 +9,7 @@ export default function Monitoring({ interval, duration, onStop }) {
     return () => clearTimeout(timeout);
   }, []);
 
-  async function uploadFrame(file, time) {
+  const uploadFrame = useCallback(async (file, time) => {
     const formData = new FormData();
 
     formData.append("image", file);
@@ -29,7 +29,7 @@ export default function Monitoring({ interval, duration, onStop }) {
     } catch (_) {
       console.error("Failed to upload image to server.");
     }
-  }
+  });
 
   return (
     <div>

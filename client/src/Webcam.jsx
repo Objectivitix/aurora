@@ -1,6 +1,6 @@
-import { useRef, useEffect, useState } from "react";
+import { memo, useRef, useEffect, useState } from "react";
 
-export default function Webcam({ intervalSecs, onCapture, hidden }) {
+export default memo(function Webcam({ intervalSecs, onCapture, hidden }) {
   const [isError, setIsError] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -87,4 +87,4 @@ export default function Webcam({ intervalSecs, onCapture, hidden }) {
       <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
     </div>
   );
-}
+});
