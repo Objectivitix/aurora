@@ -103,5 +103,5 @@ def new_session():
 # Driver code, starts the Flask server by hosting
 # it locally on port 5000
 if __name__ == "__main__":
-    # tester.test_real_time(save_file="test-output/test.mp4", scale=0.75, save_fps=60)
+    # tester.test_real_time(save_file="test-output/test.mp4", scale=0.75, save_fps=15)
     app.run(debug=True, port=5000)

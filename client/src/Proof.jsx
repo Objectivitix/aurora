@@ -67,7 +67,7 @@ export default function Proof() {
       <h1>Posture Analyzer</h1>
       <form onSubmit={handleSubmit}>
         <input type="file" accept="image/*" onChange={handleFileChange} />
-        <Webcam onCapture={handleCapture} />
+        {/* <Webcam onCapture={handleCapture} /> */}
         <button type="submit">Analyze Posture</button>
       </form>
 
