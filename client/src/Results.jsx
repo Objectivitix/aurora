@@ -45,7 +45,9 @@ export default function Results({ onBackToMenu }) {
           <div className="metric">
             <p className="metric__name">Good Posture Rate</p>
             <p className="metric__body">
-              {(data.goodPostureRate * 100).toFixed(0) + "%" ?? "N/A"}
+              {data.goodPostureRate === null
+                ? "N/A"
+                : (data.goodPostureRate * 100).toFixed(0) + "%"}
             </p>
           </div>
           <button className="back-btn" onClick={onBackToMenu}>
