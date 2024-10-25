@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import ResultsChart from "./ResultsChart";
 
 export default function Results({ onBackToMenu }) {
   const [data, setData] = useState(null);
@@ -8,9 +9,9 @@ export default function Results({ onBackToMenu }) {
     const fetchData = async () => {
       try {
         const response = await fetch("http://localhost:5000/get-data");
-        const result = await response.text();
+        const result = await response.json();
         setData(result);
-      } catch (error) {
+      } catch (_) {
         console.error("Failed to fetch results from server.");
         setError(true);
       }
@@ -31,15 +32,21 @@ export default function Results({ onBackToMenu }) {
     <div>
       <p className="desc">Your results are in!</p>
       <div className="main">
-        {/* <Chart /> */}
+        <ResultsChart
+          times={data.neck.times}
+          neckAngles={data.neck.angles}
+          torsoAngles={data.torso.angles}
+        />
         <div className="right-side">
           <div className="metric">
-            <p className="metric__name">{data}</p>
-            <p className="metric__body"></p>
+            <p className="metric__name">Aura</p>
+            <p className="metric__body">{data.aura}</p>
           </div>
           <div className="metric">
-            <p className="metric__name"></p>
-            <p className="metric__body"></p>
+            <p className="metric__name">Good Posture Rate</p>
+            <p className="metric__body">
+              {(data.goodPostureRate * 100).toFixed(0) + "%" ?? "N/A"}
+            </p>
           </div>
           <button className="back-btn" onClick={onBackToMenu}>
             Back to Menu

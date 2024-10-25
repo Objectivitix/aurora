@@ -1,7 +1,6 @@
 import atexit
-import math
 from enum import Enum
-from typing import NamedTuple, TypeAlias
+from typing import NamedTuple, Optional, TypeAlias
 
 import numpy as np
 import cv2 as cv
@@ -149,9 +148,11 @@ def analyze(
     return Status.SUCCESS, calc_posture_angles(joints)
 
 
-def calc_good_posture_rate(neck_angles: np.ndarray, torso_angles: np.ndarray) -> float:
+def calc_good_posture_rate(
+    neck_angles: np.ndarray, torso_angles: np.ndarray
+) -> Optional[float]:
     if neck_angles.shape == (0,) and torso_angles.shape == (0,):
-        return math.nan
+        return None
 
     return float(
         (sum(neck_angles < 18) + sum(torso_angles < 10))

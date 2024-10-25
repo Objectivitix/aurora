@@ -37,7 +37,7 @@ def get_data():
                     "times": times,
                     "angles": torso_angles,
                 },
-                "good_posture_rate": good_rate,
+                "goodPostureRate": good_rate,
                 "aura": aura,
             }
         ),
