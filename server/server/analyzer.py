@@ -7,6 +7,7 @@ import cv2 as cv
 import mediapipe as mp
 
 Point: TypeAlias = np.ndarray[np.float64]
+Angles: TypeAlias = np.ndarray[np.float64]
 Model: TypeAlias = mp.solutions.pose.Pose
 
 draw = mp.solutions.drawing_utils
@@ -149,7 +150,7 @@ def analyze(
 
 
 def calc_good_posture_rate(
-    neck_angles: np.ndarray, torso_angles: np.ndarray
+    neck_angles: Angles, torso_angles: Angles
 ) -> Optional[float]:
     if neck_angles.shape == (0,) and torso_angles.shape == (0,):
         return None
@@ -160,7 +161,7 @@ def calc_good_posture_rate(
     )
 
 
-def calc_aura(neck_angles: np.ndarray, torso_angles: np.ndarray) -> int:
+def calc_aura(neck_angles: Angles, torso_angles: Angles) -> int:
     return int(sum((18 - neck_angles) * 10) + sum((10 - torso_angles) * 10))
 
 

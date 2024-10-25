@@ -16,15 +16,21 @@ neck_angles = []
 torso_angles = []
 
 
+def filter_angles(angles_with_none):
+    arr = np.array(angles_with_none, dtype=np.float64)
+
+    return arr[~np.isnan(arr)]
+
+
 # Define the route we'll use to serve final analysis data as JSON.
 # We're essentially making our own API for client-server comms.
 @app.route("/get-data", methods=["GET"])
 def get_data():
-    neck_numpy = np.array(neck_angles)
-    torso_numpy = np.array(torso_angles)
+    neck_filtered = filter_angles(neck_angles)
+    torso_filtered = filter_angles(torso_angles)
 
-    good_rate = analyzer.calc_good_posture_rate(neck_numpy, torso_numpy)
-    aura = analyzer.calc_aura(neck_numpy, torso_numpy)
+    good_rate = analyzer.calc_good_posture_rate(neck_filtered, torso_filtered)
+    aura = analyzer.calc_aura(neck_filtered, torso_filtered)
 
     return (
         jsonify(
@@ -65,28 +71,19 @@ def submit_frame():
         kwargs={"save_file": "test-output/test.jpg", "scale": 0.75},
     ).start()
 
-    if status == analyzer.Status.SUCCESS:
-        times.append(int(request.form["time"]))
-        neck_angles.append(neck_angle)
-        torso_angles.append(torso_angle)
-
-        return (
-            jsonify(
-                {
-                    "neckAngle": neck_angle,
-                    "torsoAngle": torso_angle,
-                }
-            ),
-            201,
-        )
+    times.append(int(request.form["time"]))
+    neck_angles.append(neck_angle)
+    torso_angles.append(torso_angle)
 
     return (
         jsonify(
             {
-                "message": repr(status),
+                "status": repr(status),
+                "neckAngle": neck_angle,
+                "torsoAngle": torso_angle,
             }
         ),
-        400,
+        201,
     )
 
 

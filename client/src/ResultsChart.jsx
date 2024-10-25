@@ -27,6 +27,7 @@ export default function ResultsChart({ times, neckAngles, torsoAngles }) {
   };
 
   const options = {
+    spanGaps: true,
     scales: {
       y: {
         beginAtZero: true,
