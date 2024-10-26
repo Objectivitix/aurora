@@ -1,5 +1,6 @@
 import { Line } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
+import annotationPlugin from 'chartjs-plugin-annotation';
 import zoomPlugin from "chartjs-plugin-zoom";
 import { MIN_INTERVAL_SECS } from "./constants";
 import { useRef } from "react";
@@ -7,7 +8,7 @@ import { useRef } from "react";
 const RESET_ANIMATION_DURATION = 1200;
 
 // Register Chart.js components and the zoom plugin
-Chart.register(...registerables, zoomPlugin);
+Chart.register(...registerables, annotationPlugin, zoomPlugin);
 
 export default function ResultsChart({ times, neckAngles, torsoAngles }) {
   const chartRef = useRef(null);
@@ -38,6 +39,7 @@ export default function ResultsChart({ times, neckAngles, torsoAngles }) {
         // fill: false,
         // backgroundColor: 'rgba(75,192,192,0.2)',
         // borderColor: 'rgba(75,192,192,1)',
+        pointHitRadius: 5,
         pointHoverRadius: 5,
       },
       {
@@ -46,12 +48,14 @@ export default function ResultsChart({ times, neckAngles, torsoAngles }) {
         // fill: false,
         // backgroundColor: 'rgba(75,192,192,0.2)',
         // borderColor: 'rgba(75,192,192,1)',
+        pointHitRadius: 5,
         pointHoverRadius: 5,
       },
     ],
   };
 
   const options = {
+    maintainAspectRatio: false,
     interaction: {
       intersect: true,
       mode: "index",
@@ -74,6 +78,24 @@ export default function ResultsChart({ times, neckAngles, torsoAngles }) {
       },
     },
     plugins: {
+      annotation: {
+        annotations: {
+          neckThreshold: {
+            type: 'line',
+            yMin: 18,
+            yMax: 18,
+            borderColor: 'rgb(54, 162, 235, 0.5)',
+            borderWidth: 2,
+          },
+          torsoThreshold: {
+            type: 'line',
+            yMin: 10,
+            yMax: 10,
+            borderColor: 'rgb(255, 80, 132, 0.5)',
+            borderWidth: 2,
+          },
+        }
+      },
       zoom: {
         pan: {
           enabled: true,
@@ -107,7 +129,7 @@ export default function ResultsChart({ times, neckAngles, torsoAngles }) {
   };
 
   return (
-    <div style={{ position: "relative", width: "50vw" }}>
+    <div style={{ position: "relative", width: "min(50rem, 85vw)", aspectRatio: "16 / 9" }}>
       <button
         onClick={handleResetZoom}
         style={{
