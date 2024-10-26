@@ -1,5 +1,11 @@
 import { useState } from "react";
 import Webcam from "./Webcam";
+import {
+  MAX_DURATION_MINS,
+  MAX_INTERVAL_SECS,
+  MIN_DURATION_MINS,
+  MIN_INTERVAL_SECS,
+} from "./constants";
 
 export default function Start({ onStart }) {
   const [interv, setInterv] = useState(60);
@@ -33,8 +39,8 @@ export default function Start({ onStart }) {
             <input
               type="number"
               id="interval"
-              min="3"
-              max="600"
+              min={MIN_INTERVAL_SECS}
+              max={MAX_INTERVAL_SECS}
               value={interv}
               onChange={handleIntervalChange}
             />
@@ -45,8 +51,8 @@ export default function Start({ onStart }) {
             <input
               type="number"
               id="duration"
-              min="1"
-              max="600"
+              min={MIN_DURATION_MINS}
+              max={MAX_DURATION_MINS}
               value={duration}
               onChange={handleDurationChange}
             />
