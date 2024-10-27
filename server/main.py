@@ -1,3 +1,4 @@
+import argparse
 import threading
 
 import cv2 as cv
@@ -65,11 +66,12 @@ def submit_frame():
     # Delegate posture analysis to our analyzer
     status, (neck_angle, torso_angle) = analyzer.analyze(image)
 
-    threading.Thread(
-        target=tester.test_one_frame,
-        args=(image,),
-        kwargs={"save_file": "test-output/test.jpg", "scale": 0.75},
-    ).start()
+    if not args.production:
+        threading.Thread(
+            target=tester.test_one_frame,
+            args=(image,),
+            kwargs={"save_file": "test-output/test.jpg", "scale": 0.75},
+        ).start()
 
     times.append(int(request.form["time"]))
     neck_angles.append(neck_angle)
@@ -100,5 +102,17 @@ def new_session():
 # Driver code, starts the Flask server by hosting
 # it locally on port 5000
 if __name__ == "__main__":
-    # tester.test_real_time(save_file="test-output/test.mp4", scale=0.75, save_fps=15)
-    app.run(debug=True, port=5000)
+    parser = argparse.ArgumentParser(description="Run the Flask server")
+    parser.add_argument(
+        "--production",
+        action="store_true",
+        help="Run server in production mode"
+    )
+
+    args = parser.parse_args()
+
+    if args.production:
+        app.run("0.0.0.0", port=10000, debug=False)
+    else:
+        # tester.test_real_time(save_file="test-output/test.mp4", scale=0.75, save_fps=15)
+        app.run(port=5000, debug=True)
