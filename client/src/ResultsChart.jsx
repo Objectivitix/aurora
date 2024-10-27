@@ -1,14 +1,17 @@
 import { Line } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
-import annotationPlugin from 'chartjs-plugin-annotation';
+import annotationPlugin from "chartjs-plugin-annotation";
 import zoomPlugin from "chartjs-plugin-zoom";
 import { MIN_INTERVAL_SECS } from "./constants";
 import { useRef } from "react";
+import "./ResultsChart.css";
 
 const RESET_ANIMATION_DURATION = 1200;
 
 // Register Chart.js components and the zoom plugin
 Chart.register(...registerables, annotationPlugin, zoomPlugin);
+
+Chart.defaults.font.family = "Lato";
 
 export default function ResultsChart({ times, neckAngles, torsoAngles }) {
   const chartRef = useRef(null);
@@ -81,20 +84,20 @@ export default function ResultsChart({ times, neckAngles, torsoAngles }) {
       annotation: {
         annotations: {
           neckThreshold: {
-            type: 'line',
+            type: "line",
             yMin: 18,
             yMax: 18,
-            borderColor: 'rgb(54, 162, 235, 0.5)',
+            borderColor: "rgb(54, 162, 235, 0.5)",
             borderWidth: 2,
           },
           torsoThreshold: {
-            type: 'line',
+            type: "line",
             yMin: 10,
             yMax: 10,
-            borderColor: 'rgb(255, 80, 132, 0.5)',
+            borderColor: "rgb(255, 80, 132, 0.5)",
             borderWidth: 2,
           },
-        }
+        },
       },
       zoom: {
         pan: {
@@ -129,19 +132,8 @@ export default function ResultsChart({ times, neckAngles, torsoAngles }) {
   };
 
   return (
-    <div style={{ position: "relative", width: "min(50rem, 85vw)", aspectRatio: "16 / 9" }}>
-      <button
-        onClick={handleResetZoom}
-        style={{
-          position: "absolute",
-          top: "1rem",
-          right: "0.5rem",
-          background: "rgba(0, 0, 0, 0.2)",
-          border: "none",
-          cursor: "pointer",
-          padding: "0.25rem 0.5rem",
-        }}
-      >
+    <div className="chart">
+      <button className="chart__reset-zoom" onClick={handleResetZoom}>
         <svg
           width="24"
           height="24"

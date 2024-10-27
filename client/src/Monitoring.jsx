@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from "react";
 import Countdown, { Unit } from "./Countdown";
 import Webcam from "./Webcam";
+import "./Monitoring.css";
 
 export default function Monitoring({ interval, duration, onStop }) {
   useEffect(() => {
@@ -32,12 +33,12 @@ export default function Monitoring({ interval, duration, onStop }) {
   });
 
   return (
-    <div>
+    <div className="body monitoring">
       <Webcam intervalSecs={interval} onCapture={uploadFrame} hidden />
-      <p className="desc">Monitoring your aura . . .</p>
-      <div>
+      <p className="monitoring__desc">Monitoring your aura . . .</p>
+      <div className="progress">
         <Countdown duration={duration * 60} unit={Unit.MINUTES} />
-        <p className="remaining">remaining</p>
+        <p className="progress__time-remaining">remaining</p>
       </div>
       <button className="stop-btn" onClick={onStop}>
         Stop Early

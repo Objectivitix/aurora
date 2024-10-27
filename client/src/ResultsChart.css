@@ -1,0 +1,20 @@
+.chart {
+  position: relative;
+  width: min(50rem, 50vw);
+  aspect-ratio: 16 / 9;
+}
+
+.chart__reset-zoom {
+  position: absolute;
+  top: 1rem;
+  right: 0.5rem;
+  background: rgba(0, 0, 0, 0.2);
+  border: 0;
+  padding: 0.25rem 0.5rem;
+}
+
+@media screen and (max-width: 50em) {
+  .chart {
+    width: 90vw;
+  }
+}

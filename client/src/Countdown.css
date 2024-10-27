@@ -1,0 +1,14 @@
+.countdown {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.countdown__time {
+  font-size: 7rem;
+}
+
+.countdown__unit {
+  color: gray;
+  font-size: 2rem;
+}

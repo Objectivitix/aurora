@@ -1,4 +1,5 @@
 import { memo, useRef, useEffect, useState } from "react";
+import "./Webcam.css";
 
 export default memo(function Webcam({ intervalSecs, onCapture, hidden }) {
   const [isError, setIsError] = useState(false);
@@ -72,7 +73,7 @@ export default memo(function Webcam({ intervalSecs, onCapture, hidden }) {
 
   if (isError) {
     return (
-      <div className="webcam">
+      <div className="webcam webcam--error">
         <p>
           We could not access your webcam. Please check permissions or hardware
           settings.
@@ -82,9 +83,9 @@ export default memo(function Webcam({ intervalSecs, onCapture, hidden }) {
   }
 
   return (
-    <div className="webcam" style={{ display: hidden ? "none" : "contents" }}>
-      <video ref={videoRef} autoPlay style={{ width: "50vw" }}></video>
-      <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
+    <div className={"webcam" + (hidden ? " webcam--hidden" : "")}>
+      <video className="webcam__video" ref={videoRef} autoPlay></video>
+      <canvas className="webcam__canvas" ref={canvasRef}></canvas>
     </div>
   );
 });

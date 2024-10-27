@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import "./Countdown.css";
 
 // Define the enum for units
 export const Unit = {
@@ -16,6 +17,15 @@ function getConversionFactor(unit) {
     default:
       return 1;
   }
+}
+
+function getUnitString(seconds, unit) {
+  const formatted = formatTime(seconds, unit);
+
+  const base =
+    unit === Unit.MINUTES ? "min" : unit === Unit.HOURS ? "hr" : "sec";
+
+  return base + (formatted === "1" ? "" : "s");
 }
 
 function formatTime(seconds, unit) {
@@ -41,7 +51,7 @@ export default function Countdown({ duration, unit }) {
   return (
     <div className="countdown">
       <p className="countdown__time">{formatTime(timeLeft, unit)}</p>
-      <p className="countdown__unit">{unit}</p>
+      <p className="countdown__unit">{getUnitString(timeLeft, unit)}</p>
     </div>
   );
 }
