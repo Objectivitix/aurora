@@ -4,6 +4,7 @@ import annotationPlugin from "chartjs-plugin-annotation";
 import zoomPlugin from "chartjs-plugin-zoom";
 import { MIN_INTERVAL_SECS } from "./constants";
 import { useRef } from "react";
+import homeIcon from "./assets/home.svg";
 import "./ResultsChart.css";
 
 const RESET_ANIMATION_DURATION = 1200;
@@ -134,15 +135,7 @@ export default function ResultsChart({ times, neckAngles, torsoAngles }) {
   return (
     <div className="chart">
       <button className="chart__reset-zoom" onClick={handleResetZoom}>
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8h5z" fill="currentColor" />
-        </svg>
+        <img src={homeIcon} alt="" />
       </button>
       <Line ref={chartRef} data={data} options={options} />
     </div>

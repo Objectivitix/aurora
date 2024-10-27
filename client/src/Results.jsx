@@ -33,6 +33,12 @@ export default function Results({ onBackToMenu }) {
     success = true;
   }
 
+  const backToMenuButton = (
+    <button className="back-btn" onClick={onBackToMenu}>
+      Back to Menu
+    </button>
+  );
+
   return (
     <div className="body results">
       <p className="results__desc">{desc}</p>
@@ -56,12 +62,11 @@ export default function Results({ onBackToMenu }) {
                   : (data.goodPostureRate * 100).toFixed(0) + " %"}
               </p>
             </div>
-            <button className="back-btn" onClick={onBackToMenu}>
-              Back to Menu
-            </button>
+            {backToMenuButton}
           </div>
         </div>
       )}
+      {error && backToMenuButton}
     </div>
   );
 }

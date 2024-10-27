@@ -89,6 +89,10 @@
   margin-top: auto;
 }
 
+.start-btn {
+  width: 100%;
+}
+
 @media screen and (max-width: 50em) {
   .start__body {
     flex-direction: column;
@@ -107,5 +111,9 @@
 
   .start-btn-wrapper {
     margin-top: 1rem;
+  }
+
+  .start-btn {
+    width: initial;
   }
 }

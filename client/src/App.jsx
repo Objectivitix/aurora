@@ -1,8 +1,5 @@
 import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 import "./App.css";
-import Proof from "./Proof";
 import Start from "./Start";
 import Monitoring from "./Monitoring";
 import Results from "./Results";
@@ -40,7 +37,6 @@ export default function App() {
       {state === "results" && (
         <Results onBackToMenu={() => setState("start")} />
       )}
-      {/* <Proof /> */}
     </>
   );
 }
