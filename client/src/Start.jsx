@@ -77,6 +77,7 @@ export default function Start({ onStart }) {
             </button>
           </div>
         </form>
+        <p className="footer">Calo's ICS4U 24-25 #3</p>
       </div>
     </div>
   );

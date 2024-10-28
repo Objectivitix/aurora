@@ -13,6 +13,8 @@
 
 .start__body {
   display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
   gap: 4rem;
 }
 
@@ -91,6 +93,13 @@
 
 .start-btn {
   width: 100%;
+}
+
+.footer {
+  width: 100%;
+
+  color: gray;
+  text-align: center;
 }
 
 @media screen and (max-width: 50em) {
