@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import ResultsChart from "./ResultsChart";
 import "./Results.css";
+import { BACKEND } from "./constants";
 
 export default function Results({ onBackToMenu }) {
   const [data, setData] = useState(null);
@@ -9,7 +10,7 @@ export default function Results({ onBackToMenu }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://localhost:5000/get-data");
+        const response = await fetch(`${BACKEND.prefix}/get-data`);
         const result = await response.json();
         setData(result);
       } catch (_) {

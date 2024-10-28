@@ -3,9 +3,10 @@ import "./App.css";
 import Start from "./Start";
 import Monitoring from "./Monitoring";
 import Results from "./Results";
+import { BACKEND } from "./constants";
 
 export default function App() {
-  const [state, setState] = useState("results");
+  const [state, setState] = useState("start");
   const [monitorInterval, setMonitorInterval] = useState(null);
   const [monitorDuration, setMonitorDuration] = useState(null);
 
@@ -15,7 +16,7 @@ export default function App() {
     setState("monitoring");
 
     try {
-      await fetch("http://localhost:5000/new-session", {
+      await fetch(`${BACKEND.prefix}/new-session`, {
         method: "POST",
       });
     } catch (_) {

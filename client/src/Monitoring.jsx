@@ -2,6 +2,7 @@ import { useCallback, useEffect } from "react";
 import Countdown, { Unit } from "./Countdown";
 import Webcam from "./Webcam";
 import "./Monitoring.css";
+import { BACKEND } from "./constants";
 
 export default function Monitoring({ interval, duration, onStop }) {
   useEffect(() => {
@@ -17,7 +18,7 @@ export default function Monitoring({ interval, duration, onStop }) {
     formData.append("time", time);
 
     try {
-      const response = await fetch("http://localhost:5000/submit-frame", {
+      const response = await fetch(`${BACKEND.prefix}/submit-frame`, {
         method: "POST",
         body: formData,
       });
