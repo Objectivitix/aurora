@@ -98,7 +98,7 @@ def is_aligned(joints: Joints) -> bool:
 
     print(f"DEBUG: {ear_offset:.2f} {shoulder_offset:.2f} {hip_offset:.2f}")
 
-    return ear_offset < 0.05 and shoulder_offset < 0.14 and hip_offset < 0.12
+    return ear_offset < 0.09 and shoulder_offset < 0.14 and hip_offset < 0.12
 
 
 def calc_posture_angles(joints: Joints) -> tuple[int, int]:
@@ -113,8 +113,6 @@ def calc_posture_angles(joints: Joints) -> tuple[int, int]:
 
     neck_angle = abs(calc_angle(ear, shoulder, hip) - NECK_ANGLE_OFFSET)
     torso_angle = calc_angle(shoulder, hip, hip + upwards_nudge)
-
-    # print(f"DEBUG: {neck_angle:.2f} {torso_angle:.2f}")
 
     return neck_angle, torso_angle
 

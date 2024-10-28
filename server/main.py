@@ -115,4 +115,4 @@ if __name__ == "__main__":
         app.run("0.0.0.0", port=10000, debug=False)
     else:
         # tester.test_real_time(save_file="test-output/test.mp4", scale=0.75, save_fps=15)
-        app.run(port=5000, debug=True)
+        app.run(port=10000, debug=True)
