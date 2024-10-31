@@ -16,6 +16,8 @@ times = []
 neck_angles = []
 torso_angles = []
 
+production = True
+
 
 def filter_angles(angles_with_none):
     arr = np.array(angles_with_none, dtype=np.float64)
@@ -66,7 +68,7 @@ def submit_frame():
     # Delegate posture analysis to our analyzer
     status, (neck_angle, torso_angle) = analyzer.analyze(image)
 
-    if not args.production:
+    if not production:
         threading.Thread(
             target=tester.test_one_frame,
             args=(image,),
@@ -99,20 +101,29 @@ def new_session():
     return jsonify({"message": "New monitoring session begun!"}), 201
 
 
-# Driver code, starts the Flask server by hosting
-# it locally on port 5000
+# Driver code for all non-production testing
 if __name__ == "__main__":
+    production = False
+
     parser = argparse.ArgumentParser(description="Run the Flask server")
+
     parser.add_argument(
-        "--production",
+        "--port", type=int, default=10000, help="Specify port on which server listens."
+    )
+
+    parser.add_argument(
+        "--debug", action="store_true", help="Run server in debug mode."
+    )
+
+    parser.add_argument(
+        "--real-time-model-test",
         action="store_true",
-        help="Run server in production mode"
+        help="Run real-time analyzer test instead of the server. If activated, port and debug are ignored.",
     )
 
     args = parser.parse_args()
 
-    if args.production:
-        app.run("0.0.0.0", port=10000, debug=False)
+    if args.real_time_model_test:
+        tester.test_real_time(save_file="test-output/test.mp4", scale=0.75, save_fps=15)
     else:
-        # tester.test_real_time(save_file="test-output/test.mp4", scale=0.75, save_fps=15)
-        app.run(port=10000, debug=True)
+        app.run("0.0.0.0", port=args.port, debug=args.debug)
